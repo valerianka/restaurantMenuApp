@@ -14,107 +14,58 @@ struct Menu: View {
     @State var isMains: Bool = false
     @State var isDesserts: Bool = false
     @State var isDrinks: Bool = false
+    @State var hasLoadedMenuData: Bool = false
+    @State var categories:[Bool] = [true,true,true,true]
     var body: some View {
         VStack(alignment: .leading) {
-            Image("logo-header")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .padding(.leading, 110)
-                .padding(.trailing, 110)
-            VStack(alignment: .leading){
-                Text("Little Lemon")
-                    .padding(.top, 16)
-                    .foregroundColor(Color(red: 244 / 255, green: 206 / 255, blue: 20 / 255))
-                    .font(.system(.largeTitle).bold())
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Chicago")
-                            .foregroundColor(Color.white)
-                            .font(.system(.title).bold())
-                            .padding(.bottom, 8)
-                        Text("We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.")
-                            .foregroundColor(Color.white)
-                            .font(.system(.body))
-                            .padding(.trailing, 8)
-                    }
-                    Image("food-photo")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(.leading, 8)
-                }
-                .padding(.bottom, 16)
-                TextField("Search menu", text: $searchText)
-                    .frame(minWidth:0, maxWidth:250)
-                    .foregroundColor(Color.white)
-                    .border(Color.white)
-                    .cornerRadius(25)
-                    .padding(.bottom, 8)
-            }
-            .padding(.leading, 8)
-            .padding(.trailing, 8)
-            .frame(minHeight: 350)
-            .background(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
-            Group{
-                Text("ORDER FOR DELIVERY!")
-                    .font(.system(.headline))
-                    .padding(.leading, 8)
-                    .padding(.top, 8)
-                HStack{
-                    Button("Starters") {
-                        isStarters = !isStarters
-                    }
-                        .frame(minWidth:0, maxWidth:.infinity)
-                        .padding(8)
-                        .background(Color(red:  237 / 255, green: 239 / 255, blue: 238 / 255))
-                        .cornerRadius(25)
-                        .foregroundColor(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
-                        .font(.system(.body)).bold()
-                    Button("Mains") {
-                        isMains = !isMains
-                    }
-                        .frame(minWidth:0, maxWidth:.infinity)
-                        .padding(8)
-                        .background(Color(red:  237 / 255, green: 239 / 255, blue: 238 / 255))
-                        .cornerRadius(25)
-                        .foregroundColor(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
-                        .font(.system(.body)).bold()
-                    Button("Desserts") {
-                        isDesserts = !isDesserts
-                    }
-                        .frame(minWidth:0, maxWidth:.infinity)
-                        .padding(8)
-                        .background(Color(red:  237 / 255, green: 239 / 255, blue: 238 / 255))
-                        .cornerRadius(25)
-                        .foregroundColor(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
-                        .font(.system(.body)).bold()
-                    Button("Drinks") {
-                        isDrinks = !isDrinks
-                    }
-                        .frame(minWidth:0, maxWidth:.infinity)
-                        .padding(8)
-                        .background(Color(red:  237 / 255, green: 239 / 255, blue: 238 / 255))
-                        .cornerRadius(25)
-                        .foregroundColor(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
-                        .font(.system(.body)).bold()
-                }
+            HeroSectionView()
+            TextField("Search menu", text: $searchText)
+                .frame(minWidth:0, maxWidth:250)
+                .foregroundColor(Color.gray)
+                .background(Color.white)
+                .border(Color.white)
+                .cornerRadius(25)
+                .padding(.bottom, 8)
+            Text("ORDER FOR DELIVERY!")
+                .font(.system(.headline))
                 .padding(.leading, 8)
                 .padding(.top, 8)
+            HStack{
+                menuCategoryButton(category: "Starters", isOn: isStarters, categories: $categories)
+                menuCategoryButton(category: "Mains", isOn: isMains, categories: $categories)
+                menuCategoryButton(category: "Desserts", isOn: isDesserts, categories: $categories)
+                menuCategoryButton(category: "Drinks", isOn: isDrinks, categories: $categories)
             }
-        FetchedObjects(predicate: buildPredicate(), sortDescriptors: buildSortDescriptors())
-        { (dishes: [Dish]) in
-            List{
-                ForEach(dishes, id:\.id) { dish in
-                    HStack(spacing: 16){
-                        Text("\(dish.title ?? "")  \(dish.price ?? "")")
-                        AsyncImage(url: URL(string: dish.image!))
-                            .frame(maxWidth: 30, maxHeight: 30)
-                            .aspectRatio(contentMode: .fit)
+            .padding(.leading, 8)
+            .padding(.top, 8)
+            FetchedObjects(predicate: buildPredicate(), sortDescriptors: buildSortDescriptors())
+            { (dishes: [Dish]) in
+                List{
+                    ForEach(dishes, id:\.id) { dish in
+                        if (categories[getCategoryInd(category:dish.category!)]) {
+                            MenuItemView(dish: dish)
+                        }
                     }
                 }
             }
         }
+        .onAppear() {
+            if (!hasLoadedMenuData) {
+                getMenuData(urlStr: "https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/menu.json")
+                hasLoadedMenuData = true
+            }
         }
-        .onAppear() {getMenuData(urlStr: "https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/menu.json")}
+    }
+    func getCategoryInd(category: String) -> Int {
+        var res: Int
+        switch category {
+        case "starters": res = 0
+        case "mains": res = 1
+        case "desserts": res = 2
+        case "drinks": res = 3
+        default: res = 0
+        }
+        return res
     }
     func getMenuData(urlStr:String) {
         PersistenceController.shared.clear()
@@ -140,13 +91,13 @@ struct Menu: View {
                         dish.image = menuItem.image
                         dish.price = menuItem.price
                         dish.category = menuItem.category
+                        dish.itemDescription = menuItem.itemDescription
                     }
                     try? viewContext.save()
                 }
             }
         }
         task.resume()
-        
     }
     func buildSortDescriptors() -> [NSSortDescriptor] {
         return [NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.localizedStandardCompare))]
@@ -154,17 +105,8 @@ struct Menu: View {
     func buildPredicate() -> NSPredicate {
         if (!searchText.isEmpty){
             return NSPredicate(format: "title CONTAINS[cd] %@", searchText)
-        } else if (isStarters) {
-            return NSPredicate(format: "category CONTAINS[cd] %@", "starters")
-        } else if (isDesserts) {
-            return NSPredicate(format: "category CONTAINS[cd] %@", "desserts")
-        } else if (isDrinks) {
-            return NSPredicate(format: "category CONTAINS[cd] %@", "mains")
-        } else if (isDrinks) {
-            return NSPredicate(format: "category CONTAINS[cd] %@", "drinks")
-        } else {
-            return NSPredicate(value: true)
         }
+        return NSPredicate(value: true)
     }
 }
 

@@ -13,41 +13,11 @@ struct Onboarding2: View {
     @State var pswdChngNtfs:Bool = false
     @State var spclOffrsNtfs:Bool = false
     @State var nwslttrNtfs:Bool = false
+    @State var isCorrectForm2:Bool = false
     var body: some View {
-        NavigationView{
+        NavigationStack{
             VStack(alignment: .leading){
-                Image("logo-header")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .padding(.leading, 110)
-                    .padding(.trailing, 110)
-                VStack(alignment: .leading){
-                    Text("Little Lemon")
-                        .padding(.top, 16)
-                        .foregroundColor(Color(red: 244 / 255, green: 206 / 255, blue: 20 / 255))
-                        .font(.system(.largeTitle).bold())
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("Chicago")
-                                .foregroundColor(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
-                                .font(.system(.title).bold())
-                                .padding(.bottom, 8)
-                            Text("We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.")
-                                .foregroundColor(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
-                                .font(.system(.body))
-                                .padding(.trailing, 8)
-                        }
-                        Image("food-photo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(.leading, 8)
-                    }
-                    .padding(.bottom, 16)
-                }
-                .padding(.leading, 8)
-                .padding(.trailing, 8)
-                .frame(minHeight: 300)
-                .background(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
+                HeroSectionView()
                 Text("Phone number *")
                     .padding(.top, 16)
                 TextField("Phone number", text: $phoneNum)
@@ -56,7 +26,7 @@ struct Onboarding2: View {
                 Group{
                     Text("Email notifications")
                         .font(.system(.headline)).bold()
-                .padding(.top, 8)
+                        .padding(.top, 8)
                     Toggle(isOn: $orderStatusNotifs) {
                         Text("Order statuses")
                     }
@@ -74,9 +44,19 @@ struct Onboarding2: View {
                     }
                     .toggleStyle(.switch)
                 }
-                NavigationLink("Register") { Home() }
+                Button("Register") {
+                    if (!phoneNum.isEmpty) {
+                        isCorrectForm2 = true
+                        UserDefaults.standard.set(true, forKey: kIsLoggedIn)
+                        UserDefaults.standard.set(phoneNum, forKey: kPhoneNum)
+                        UserDefaults.standard.set(orderStatusNotifs, forKey: kOrderStatusNotifs)
+                        UserDefaults.standard.set(pswdChngNtfs, forKey: kPswdChngNtfs)
+                        UserDefaults.standard.set(spclOffrsNtfs, forKey: kSpclOffrsNtfs)
+                        UserDefaults.standard.set(nwslttrNtfs, forKey: kNwslttrNtfs)
+                    }
+                }
             }
-        }
+            .navigationDestination(isPresented: $isCorrectForm2) {Home()}}
     }
 }
 

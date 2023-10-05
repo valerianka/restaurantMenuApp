@@ -11,7 +11,7 @@ struct MenuItem: Codable {
     let id: Int
     let title: String
     let price: String
-    let description: String
+    let itemDescription: String
     let image: String
     let category: String
     
@@ -19,7 +19,7 @@ struct MenuItem: Codable {
         case id = "id"
         case title = "title"
         case price = "price"
-        case description = "description"
+        case itemDescription = "description"
         case image = "image"
         case category = "category"
     }

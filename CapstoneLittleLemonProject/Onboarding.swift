@@ -15,42 +15,12 @@ struct Onboarding: View {
     @State var firstName:String = ""
     @State var email:String = ""
     @State var isLoggedIn:Bool = false
+    @State var isCorrectForm:Bool = false
     var body: some View {
-        NavigationView{
+        NavigationStack{
             VStack(alignment: .leading){
-                NavigationLink(destination:Home(), isActive: $isLoggedIn) { EmptyView() }
-                Image("logo-header")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .padding(.leading, 110)
-                    .padding(.trailing, 110)
-                VStack(alignment: .leading){
-                    Text("Little Lemon")
-                        .padding(.top, 16)
-                        .foregroundColor(Color(red: 244 / 255, green: 206 / 255, blue: 20 / 255))
-                        .font(.system(.largeTitle).bold())
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("Chicago")
-                                .foregroundColor(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
-                                .font(.system(.title).bold())
-                                .padding(.bottom, 8)
-                            Text("We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.")
-                                .foregroundColor(Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255))
-                                .font(.system(.body))
-                                .padding(.trailing, 8)
-                        }
-                        Image("food-photo")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(.leading, 8)
-                    }
-                    .padding(.bottom, 16)
-                }
-                .padding(.leading, 8)
-                .padding(.trailing, 8)
-                .frame(minHeight: 300)
-                .background(Color(red:  73 / 255, green: 94 / 255, blue: 87 / 255))
+                //                NavigationLink(destination:Home(), isActive: $isLoggedIn) { EmptyView() }
+                HeroSectionView()
                 VStack{
                     Text("Name *")
                         .padding(.top, 16)
@@ -60,7 +30,11 @@ struct Onboarding: View {
                         .padding(.top, 8)
                     TextField("Email", text: $email)
                         .textFieldStyle(.roundedBorder)
-                    NavigationLink("Next"){Onboarding2()}
+                    Button("Next"){
+                        if (!firstName.isEmpty && !email.isEmpty) {
+                            isCorrectForm = true
+                        }
+                    }
                     .padding(.top, 8)
                     Spacer()
                 }
@@ -71,6 +45,8 @@ struct Onboarding: View {
                     isLoggedIn = true
                 }
             }
+            .navigationDestination(isPresented: $isLoggedIn){Home()}
+            .navigationDestination(isPresented: $isCorrectForm){Onboarding2()}
         }
     }
 }
